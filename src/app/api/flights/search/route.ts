@@ -1,0 +1,43 @@
+import { NextResponse } from 'next/server';
+import { searchFlights } from '@/services/flightProvider';
+import { FlightSearchQuery } from '@/context/SearchContext';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: Request) {
+    try {
+        const body: FlightSearchQuery = await request.json();
+
+        // 1. Validate payload
+        const { origin, destination, departureDate } = body;
+
+        if (!origin || !departureDate) {
+            return NextResponse.json(
+                { message: 'Missing required parameters. Need origin and departureDate.' },
+                { status: 400 }
+            );
+        }
+
+        if (destination && origin === destination) {
+            return NextResponse.json(
+                { message: 'Origin and destination cannot be the same.' },
+                { status: 400 }
+            );
+        }
+
+        // 2. Pass exact parameters from body to the provider orchestrator
+        // By default uses the 'mock' provider. Switch to 'customScraper' to use the stub.
+        const flights = await searchFlights(body, 'customScraper');
+
+        // 3. Return results
+        return NextResponse.json({ flights }, { status: 200 });
+
+    } catch (error: any) {
+        console.error('[API] /api/flights/search error:', error);
+
+        return NextResponse.json(
+            { message: error.message || 'Internal server error while searching flights' },
+            { status: 500 }
+        );
+    }
+}
