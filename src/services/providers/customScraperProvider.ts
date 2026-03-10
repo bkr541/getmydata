@@ -31,7 +31,16 @@ export async function customSearchFlights(
         console.log(`[Scraper] Initiating search: ${origin} to ${destination || 'anywhere'} on ${departureDate}`);
 
         // Launch headless browser
-        browser = await chromium.launch({ headless: true });
+        browser = await chromium.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu'
+            ]
+        });
         const context = await browser.newContext();
         const page = await context.newPage();
 
@@ -155,9 +164,9 @@ export async function customSearchFlights(
 
         return results;
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('[Scraper] Error fetching flights:', error);
-        throw new Error('Failed to retrieve flights from custom provider');
+        throw new Error(`Failed to retrieve flights: ${error.message || 'Unknown Custom Provider Error'}`);
     } finally {
         if (browser) await browser.close();
     }
