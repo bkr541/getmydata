@@ -19,13 +19,13 @@ export default function SearchForm() {
     }, [searchQuery]);
 
     useEffect(() => {
-        const isOriginValid = origin.length === 3;
-        // destination is optional, but if entered it should be 3 chars OR start with CITY:
+        const isOriginValid = origin.length === 0 || origin.length === 3;
         const isDestinationValid = destination.length === 0 || destination.length === 3 || destination.startsWith('CITY:');
-        const isDifferent = origin !== destination;
+        const hasRequiredField = origin.length === 3 || destination.length >= 3;
+        const isDifferent = origin !== destination || (origin === '' && destination === '');
         const isDateValid = departureDate.length > 0;
 
-        setIsValid(isOriginValid && isDestinationValid && isDifferent && isDateValid);
+        setIsValid(isOriginValid && isDestinationValid && hasRequiredField && isDifferent && isDateValid);
     }, [origin, destination, departureDate]);
 
     const handleOriginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,11 +59,18 @@ export default function SearchForm() {
         setFlightResults(null);
 
         try {
-            const response = await fetch('/api/flights/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(query),
-            });
+            let response;
+            if (!origin && destination) {
+                // Inbound search: only destination and date are provided
+                response = await fetch(`/api/flights/inbound?destination=${destination}&date=${departureDate}`);
+            } else {
+                // Outbound search
+                response = await fetch('/api/flights/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(query),
+                });
+            }
 
             const data = await response.json();
 
@@ -93,7 +100,6 @@ export default function SearchForm() {
                         placeholder="e.g. JFK"
                         maxLength={3}
                         autoComplete="off"
-                        required
                     />
                 </div>
 
@@ -127,7 +133,7 @@ export default function SearchForm() {
                 />
             </div>
 
-            {origin === destination && origin.length === 3 && (
+            {origin !== '' && origin === destination && origin.length === 3 && (
                 <p className="error-text">Origin and destination cannot be the same.</p>
             )}
 

@@ -171,3 +171,105 @@ export async function customSearchFlights(
         if (browser) await browser.close();
     }
 }
+
+export async function customInboundFlights(
+    destination: string,
+    departureDate: string,
+    maxWorkers: number = 10
+): Promise<FlightResult[]> {
+
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyOTQ4LCJlbWFpbCI6ImtvZHlyb2JpbnNvbjAyQGdtYWlsLmNvbSIsImV4cCI6MTc3NDM0ODEwOCwiaWF0IjoxNzcxNzU2MTA4fQ.PfWc26pRP25u9SrX4MINas9BWMzxu8qZtNleqzm8kPY';
+
+    const targetUrl = `https://frontier-gowild-gamma.vercel.app/api/flights/inbound?destination=${destination}&date=${departureDate}&max_workers=${maxWorkers}`;
+
+    let browser;
+    try {
+        console.log(`[Scraper] Initiating inbound search to ${destination} on ${departureDate}`);
+
+        browser = await chromium.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu'
+            ]
+        });
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        await page.goto('https://frontier-gowild-gamma.vercel.app/', { waitUntil: 'domcontentloaded' });
+        await new Promise(r => setTimeout(r, 2000));
+
+        const browserData = await page.evaluate(async ({ url, token }) => {
+            try {
+                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                return `JSON:${JSON.stringify(data)}`;
+            } catch (e: any) {
+                return `ERROR: ${e.toString()}`;
+            }
+        }, { url: targetUrl, token });
+
+        if (browserData.startsWith('ERROR:')) {
+            throw new Error(`Browser fetch failed: ${browserData}`);
+        }
+
+        const results: FlightResult[] = [];
+        let parsedData;
+        if (browserData.startsWith('JSON:')) {
+            parsedData = JSON.parse(browserData.substring(5));
+        }
+
+        if (parsedData && parsedData.flights) {
+            // flights is a dict mapping origin -> array of flights
+            for (const originCode of Object.keys(parsedData.flights)) {
+                for (const f of parsedData.flights[originCode]) {
+                    const formatTime = (isoString: string) => {
+                        const d = new Date(isoString);
+                        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    };
+
+                    const airlineCode = f.segments && f.segments[0] ? f.segments[0].carrier_code : 'Unknown';
+                    const fNum = f.segments && f.segments[0] ? f.segments[0].flight_number : '';
+
+                    let cheapest = 0;
+                    let cabin = 'Economy';
+                    if (f.fares && f.fares.go_wild) {
+                        cheapest = f.fares.go_wild.total;
+                        cabin = 'Go Wild';
+                    } else if (f.fares && f.fares.standard) {
+                        cheapest = f.fares.standard.total;
+                        cabin = 'Standard';
+                    }
+
+                    results.push({
+                        id: `${airlineCode}${fNum}-${Date.now()}-${Math.random()}`,
+                        airline: airlineCode === 'F9' ? 'Frontier' : airlineCode,
+                        flightNumber: `${airlineCode}${fNum}`,
+                        origin: f.origin || originCode,
+                        destination: f.destination || destination,
+                        departureTime: formatTime(f.departure_time || f.segments?.[0]?.departure_time || departureDate),
+                        arrivalTime: formatTime(f.arrival_time),
+                        duration: f.total_trip_time,
+                        stops: f.stops,
+                        cabin: cabin,
+                        price: cheapest,
+                        currency: 'USD',
+                        notes: Object.keys(f.fares || {}).join(', '),
+                        rawPayload: f
+                    });
+                }
+            }
+        }
+
+        return results;
+
+    } catch (error: any) {
+        console.error('[Scraper] Error fetching inbound flights:', error);
+        throw new Error(`Failed to retrieve inbound flights: ${error.message || 'Unknown Custom Provider Error'}`);
+    } finally {
+        if (browser) await browser.close();
+    }
+}
