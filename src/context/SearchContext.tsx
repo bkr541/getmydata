@@ -8,6 +8,7 @@ export interface FlightSearchQuery {
     departureDate: string;
     layoverTime?: number;
     nonstopDayTrip?: boolean;
+    returnDate?: string;
 }
 
 export interface FlightResult {
@@ -33,6 +34,8 @@ interface SearchContextType {
     setSearchQuery: (query: FlightSearchQuery) => void;
     flightResults: FlightResult[] | null;
     setFlightResults: (results: FlightResult[] | null) => void;
+    returnFlightResults: FlightResult[] | null;
+    setReturnFlightResults: (results: FlightResult[] | null) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
     error: string | null;
@@ -46,6 +49,7 @@ const SearchContext = createContext<SearchContextType | undefined>(undefined);
 export function SearchProvider({ children }: { children: ReactNode }) {
     const [searchQuery, setSearchQuery] = useState<FlightSearchQuery>({ origin: '', destination: '', departureDate: '' });
     const [flightResults, setFlightResults] = useState<FlightResult[] | null>(null);
+    const [returnFlightResults, setReturnFlightResults] = useState<FlightResult[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [recentSearches, setRecentSearches] = useState<FlightSearchQuery[]>([]);
@@ -64,6 +68,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
             value={{
                 searchQuery, setSearchQuery,
                 flightResults, setFlightResults,
+                returnFlightResults, setReturnFlightResults,
                 isLoading, setIsLoading,
                 error, setError,
                 recentSearches, addRecentSearch

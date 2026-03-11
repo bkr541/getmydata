@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { customSearchFlights, customInboundFlights } from '@/services/providers/customScraperProvider';
+import { transformDayTripResponse, TransformOptions } from '@/services/dayTripService';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
             );
         }
 
-        const minLayoverMs = layoverTimeParam ? parseInt(layoverTimeParam, 10) * 60 * 60 * 1000 : 0;
+        const minimumLayoverHours = layoverTimeParam ? parseFloat(layoverTimeParam) : 4;
         const isNonstop = nonstopParam !== 'false'; // Defaults to true
 
         // 1. Fetch all outgoing flights from origin
@@ -38,11 +39,8 @@ export async function GET(request: Request) {
         }
 
         if (!outboundFlights.length) {
-            return NextResponse.json({ flights: [] }, { status: 200, headers: corsHeaders });
+            return NextResponse.json({ flights: [], dayTrips: [], rulesApplied: {} }, { status: 200, headers: corsHeaders });
         }
-
-        // Get unique destinations from outbound results
-        const uniqueDestinations = new Set(outboundFlights.map(f => f.destination));
 
         // 2. Fetch all incoming flights back to origin
         // Note: customInboundFlights searches everywhere *to* a destination. 
@@ -53,50 +51,25 @@ export async function GET(request: Request) {
         }
 
         if (!inboundFlights.length) {
-            return NextResponse.json({ flights: [] }, { status: 200, headers: corsHeaders });
+            return NextResponse.json({ flights: outboundFlights, dayTrips: [], rulesApplied: {} }, { status: 200, headers: corsHeaders });
         }
 
-        // 3. Match and filter based on time
-        const validDayTrips = [];
+        const combinedRawFlights = [...outboundFlights, ...inboundFlights];
 
-        for (const outFlight of outboundFlights) {
-            const dest = outFlight.destination;
+        // 3. Setup business logic rules
+        const rules: TransformOptions = {
+            originAirport: origin,
+            minimumLayoverHours,
+            nonstopOnly: isNonstop,
+            sameDayReturnRequired: true,
+            maxTripsPerDestination: 10,
+            rankMode: "balanced"
+        };
 
-            // Find all inbound flights that leave from this destination
-            const potentialReturns = inboundFlights.filter(inF => inF.origin === dest);
+        // 4. Transform the raw scraped payload
+        const finalResponse = transformDayTripResponse(combinedRawFlights, rules);
 
-            for (const inFlight of potentialReturns) {
-                // Ensure the return flight departs AFTER the outbound flight arrives (plus layover)
-                const outArrivalStr = outFlight.rawPayload?.arrival_time;
-                // For inbound flights from our custom scraper, segments[0].departure_time is most reliable
-                const inDepartureStr = inFlight.rawPayload?.segments?.[0]?.departure_time || inFlight.rawPayload?.departure_time;
-
-                if (outArrivalStr && inDepartureStr) {
-                    const outArrivalMs = new Date(outArrivalStr).getTime();
-                    const inDepartureMs = new Date(inDepartureStr).getTime();
-
-                    if ((inDepartureMs - outArrivalMs) >= minLayoverMs) {
-                        // Valid pair found! Add BOTH to the raw output.
-                        outFlight.dayTripDestination = dest;
-                        inFlight.dayTripDestination = dest;
-                        validDayTrips.push(outFlight);
-                        validDayTrips.push(inFlight);
-                    }
-                }
-            }
-        }
-
-        // Deduplicate in case a single flight is part of multiple valid pairs
-        const uniqueDayTripsMap = new Map();
-        for (const flight of validDayTrips) {
-            if (!uniqueDayTripsMap.has(flight.id)) {
-                uniqueDayTripsMap.set(flight.id, flight);
-            }
-        }
-
-        const finalFlights = Array.from(uniqueDayTripsMap.values());
-
-        return NextResponse.json({ flights: finalFlights }, { status: 200, headers: corsHeaders });
+        return NextResponse.json(finalResponse, { status: 200, headers: corsHeaders });
 
     } catch (error: any) {
         console.error('[API] /api/flights/dayTrips error:', error);

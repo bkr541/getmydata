@@ -19,7 +19,7 @@ export default function RecentSearches() {
                         className={styles.tag}
                         onClick={() => setSearchQuery(search)}
                     >
-                        <span className={styles.route}>{search.origin} → {search.destination}</span>
+                        <span className={styles.route}>{search.origin || '🌐'} → {search.destination || '🌐'}</span>
                         <span className={styles.date}>{search.departureDate}</span>
                     </button>
                 ))}

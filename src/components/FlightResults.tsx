@@ -7,7 +7,8 @@ import FlightGroup from './FlightGroup';
 import styles from './FlightResults.module.css';
 
 export default function FlightResults() {
-    const { flightResults, isLoading, error } = useSearch();
+    const { searchQuery, flightResults, returnFlightResults, isLoading, error } = useSearch();
+    const [activeTab, setActiveTab] = React.useState<'departure' | 'return'>('departure');
 
     if (isLoading) {
         return (
@@ -46,9 +47,12 @@ export default function FlightResults() {
         );
     }
 
+    const isRoundTrip = returnFlightResults !== null && returnFlightResults.length > 0;
+    const currentResults = activeTab === 'return' && isRoundTrip ? (returnFlightResults || []) : flightResults;
+
     // Group calculation
-    const destinationGroups = flightResults.reduce((acc: { [key: string]: FlightResult[] }, flight) => {
-        const groupKey = flight.dayTripDestination || flight.destination;
+    const destinationGroups = currentResults.reduce((acc: { [key: string]: FlightResult[] }, flight) => {
+        const groupKey = flight.dayTripDestination || (activeTab === 'return' ? flight.origin : flight.destination);
         if (!acc[groupKey]) {
             acc[groupKey] = [];
         }
@@ -62,8 +66,26 @@ export default function FlightResults() {
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Search Results</h2>
-            <p className={styles.subtitle}>
-                {flightResults.length} flights found
+
+            {isRoundTrip && (
+                <div className={styles.tabsContainer}>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'departure' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('departure')}
+                    >
+                        Departing: {searchQuery.origin || '🌐'} → {searchQuery.destination || '🌐'} ({flightResults?.length || 0})
+                    </button>
+                    <button
+                        className={`${styles.tabButton} ${activeTab === 'return' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('return')}
+                    >
+                        Returning: {searchQuery.destination || '🌐'} → {searchQuery.origin || '🌐'} ({returnFlightResults?.length || 0})
+                    </button>
+                </div>
+            )}
+
+            <p className={styles.subtitle} style={{ marginTop: isRoundTrip ? '1rem' : 0 }}>
+                {currentResults.length} flights found
                 {useGroupedLayout ? ` | ${uniqueDestinationKeys.length} destinations` : ''}
             </p>
 
@@ -77,7 +99,7 @@ export default function FlightResults() {
                         />
                     ))
                 ) : (
-                    flightResults.map((flight: FlightResult) => (
+                    currentResults.map((flight: FlightResult) => (
                         <FlightCard key={flight.id} flight={flight} />
                     ))
                 )}

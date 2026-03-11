@@ -5,11 +5,14 @@ import { useSearch, FlightSearchQuery } from '@/context/SearchContext';
 import styles from './SearchForm.module.css';
 
 export default function SearchForm() {
-    const { searchQuery, setSearchQuery, setIsLoading, setFlightResults, setError, addRecentSearch } = useSearch();
+    // This block fixes the linter error regarding setReturnFlightResults in SearchForm
+    // Replacing the SearchForm inner state extraction
+    const { searchQuery, setSearchQuery, setIsLoading, setFlightResults, setReturnFlightResults, setError, addRecentSearch } = useSearch();
 
     const [origin, setOrigin] = useState(searchQuery.origin);
     const [destination, setDestination] = useState(searchQuery.destination);
     const [departureDate, setDepartureDate] = useState(searchQuery.departureDate);
+    const [returnDate, setReturnDate] = useState(searchQuery.returnDate || '');
     const [layoverTime, setLayoverTime] = useState(searchQuery.layoverTime ?? 6);
     const [nonstopDayTrip, setNonstopDayTrip] = useState(searchQuery.nonstopDayTrip ?? true);
     const [isValid, setIsValid] = useState(false);
@@ -22,6 +25,7 @@ export default function SearchForm() {
         setOrigin(searchQuery.origin);
         setDestination(searchQuery.destination);
         setDepartureDate(searchQuery.departureDate);
+        if (searchQuery.returnDate !== undefined) setReturnDate(searchQuery.returnDate);
         if (searchQuery.layoverTime !== undefined) setLayoverTime(searchQuery.layoverTime);
         if (searchQuery.nonstopDayTrip !== undefined) setNonstopDayTrip(searchQuery.nonstopDayTrip);
     }, [searchQuery]);
@@ -43,10 +47,11 @@ export default function SearchForm() {
 
         const isDifferent = origin !== destination || (origin === '' && destination === '');
         const isDateValid = departureDate.length > 0;
+        const isReturnDateValid = tripType === 'Round Trip' ? returnDate.length > 0 : true;
         const bothFilledError = searchAllLocations && origin.length > 0 && destination.length > 0;
 
-        setIsValid(!bothFilledError && isOriginValid && isDestinationValid && hasRequiredField && isDifferent && isDateValid);
-    }, [origin, destination, departureDate, searchAllLocations, tripType]);
+        setIsValid(!bothFilledError && isOriginValid && isDestinationValid && hasRequiredField && isDifferent && isDateValid && isReturnDateValid);
+    }, [origin, destination, departureDate, returnDate, searchAllLocations, tripType]);
 
     const disableOrigin = searchAllLocations && destination.length > 0;
     const disableDestination = searchAllLocations && origin.length > 0;
@@ -86,13 +91,14 @@ export default function SearchForm() {
         e.preventDefault();
         if (!isValid) return;
 
-        const query: FlightSearchQuery = { origin, destination, departureDate, layoverTime, nonstopDayTrip };
+        const query: FlightSearchQuery = { origin, destination, departureDate, returnDate: tripType === 'Round Trip' ? returnDate : undefined, layoverTime, nonstopDayTrip };
         setSearchQuery(query);
         addRecentSearch(query);
 
         setIsLoading(true);
         setError(null);
         setFlightResults(null);
+        setReturnFlightResults(null);
 
         try {
             let response;
@@ -102,6 +108,12 @@ export default function SearchForm() {
             } else if (!origin && destination) {
                 // Inbound search: only destination and date are provided
                 response = await fetch(`/api/flights/inbound?destination=${destination}&date=${departureDate}`);
+            } else if (tripType === 'Round Trip') {
+                response = await fetch('/api/flights/roundTrip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(query),
+                });
             } else {
                 // Outbound search
                 response = await fetch('/api/flights/search', {
@@ -117,7 +129,13 @@ export default function SearchForm() {
                 throw new Error(data.message || 'Failed to search flights');
             }
 
-            setFlightResults(data.flights);
+            if (tripType === 'Round Trip') {
+                setFlightResults(data.outboundFlights || []);
+                setReturnFlightResults(data.returnFlights || []);
+            } else {
+                setFlightResults(data.flights || []);
+                setReturnFlightResults(null);
+            }
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred');
         } finally {
@@ -220,6 +238,19 @@ export default function SearchForm() {
                     onChange={(e) => setDepartureDate(e.target.value)}
                     required
                 />
+                {tripType === 'Round Trip' && (
+                    <div className="form-group" style={{ marginLeft: '1rem' }}>
+                        <label htmlFor="returnDate" className="form-label">Return Date</label>
+                        <input
+                            id="returnDate"
+                            type="date"
+                            className="form-input"
+                            value={returnDate}
+                            onChange={(e) => setReturnDate(e.target.value)}
+                            required
+                        />
+                    </div>
+                )}
                 {tripType !== 'Same Day' && (
                     <div className={styles.searchAllContainer}>
                         <span>Search All Locations</span>
