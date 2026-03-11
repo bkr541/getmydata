@@ -19,6 +19,7 @@ export async function GET(request: Request) {
         const origin = searchParams.get('origin');
         const departureDate = searchParams.get('date');
         const layoverTimeParam = searchParams.get('layovertime');
+        const nonstopParam = searchParams.get('nonstop');
 
         if (!origin || !departureDate) {
             return NextResponse.json(
@@ -28,9 +29,14 @@ export async function GET(request: Request) {
         }
 
         const minLayoverMs = layoverTimeParam ? parseInt(layoverTimeParam, 10) * 60 * 60 * 1000 : 0;
+        const isNonstop = nonstopParam !== 'false'; // Defaults to true
 
         // 1. Fetch all outgoing flights from origin
-        const outboundFlights = await customSearchFlights(origin, '', departureDate);
+        let outboundFlights = await customSearchFlights(origin, '', departureDate);
+        if (isNonstop) {
+            outboundFlights = outboundFlights.filter(f => f.stops === 0);
+        }
+
         if (!outboundFlights.length) {
             return NextResponse.json({ flights: [] }, { status: 200, headers: corsHeaders });
         }
@@ -41,7 +47,11 @@ export async function GET(request: Request) {
         // 2. Fetch all incoming flights back to origin
         // Note: customInboundFlights searches everywhere *to* a destination. 
         // Here, our "destination" is our home origin.
-        const inboundFlights = await customInboundFlights(origin, departureDate, 15);
+        let inboundFlights = await customInboundFlights(origin, departureDate, 15);
+        if (isNonstop) {
+            inboundFlights = inboundFlights.filter(f => f.stops === 0);
+        }
+
         if (!inboundFlights.length) {
             return NextResponse.json({ flights: [] }, { status: 200, headers: corsHeaders });
         }
@@ -67,6 +77,8 @@ export async function GET(request: Request) {
 
                     if ((inDepartureMs - outArrivalMs) >= minLayoverMs) {
                         // Valid pair found! Add BOTH to the raw output.
+                        outFlight.dayTripDestination = dest;
+                        inFlight.dayTripDestination = dest;
                         validDayTrips.push(outFlight);
                         validDayTrips.push(inFlight);
                     }

@@ -6,6 +6,8 @@ export interface FlightSearchQuery {
     origin: string;
     destination: string;
     departureDate: string;
+    layoverTime?: number;
+    nonstopDayTrip?: boolean;
 }
 
 export interface FlightResult {
@@ -22,6 +24,7 @@ export interface FlightResult {
     price: number;
     currency: string;
     notes?: string;
+    dayTripDestination?: string;
     rawPayload: any;
 }
 

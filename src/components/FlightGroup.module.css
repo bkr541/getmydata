@@ -1,0 +1,97 @@
+.groupContainer {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.header:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.headerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.chevron {
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.expandedContent {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    display: flex;
+    background-color: var(--bg-color);
+    /* Light gray for distinction */
+    border-top: 1px solid var(--border-color);
+}
+
+.timeline {
+    width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1.5rem;
+    margin-right: 1.5rem;
+    position: relative;
+    border-right: 2px solid var(--border-color);
+    opacity: 0.5;
+}
+
+.flightList {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.5rem;
+}

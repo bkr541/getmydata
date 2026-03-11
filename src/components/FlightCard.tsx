@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { FlightResult } from '@/context/SearchContext';
 import styles from './FlightCard.module.css';
 
-export default function FlightCard({ flight }: { flight: FlightResult }) {
+export default function FlightCard({ flight, isGrouped = false }: { flight: FlightResult, isGrouped?: boolean }) {
     const [showRaw, setShowRaw] = useState(false);
 
     const handleCopy = () => {
@@ -13,7 +13,7 @@ export default function FlightCard({ flight }: { flight: FlightResult }) {
     };
 
     return (
-        <div className={`card ${styles.flightCard}`}>
+        <div className={`card ${styles.flightCard} ${isGrouped ? styles.groupedCard : ''}`}>
             <div className={styles.header}>
                 <div className={styles.airlineInfo}>
                     <span className={styles.airline}>{flight.airline}</span>
