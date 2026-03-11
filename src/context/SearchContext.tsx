@@ -42,6 +42,8 @@ interface SearchContextType {
     setError: (error: string | null) => void;
     recentSearches: FlightSearchQuery[];
     addRecentSearch: (query: FlightSearchQuery) => void;
+    showResults: boolean;
+    setShowResults: (show: boolean) => void;
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
@@ -53,6 +55,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [recentSearches, setRecentSearches] = useState<FlightSearchQuery[]>([]);
+    const [showResults, setShowResults] = useState(false);
 
     const addRecentSearch = (query: FlightSearchQuery) => {
         setRecentSearches(prev => {
@@ -71,7 +74,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
                 returnFlightResults, setReturnFlightResults,
                 isLoading, setIsLoading,
                 error, setError,
-                recentSearches, addRecentSearch
+                recentSearches, addRecentSearch,
+                showResults, setShowResults,
             }}
         >
             {children}

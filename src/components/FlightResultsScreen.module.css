@@ -1,0 +1,189 @@
+.screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+/* ── Sticky header ── */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.15s;
+    flex-shrink: 0;
+}
+
+.backBtn:hover {
+    background-color: var(--border-color);
+    transform: translateX(-2px);
+}
+
+.headerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.route {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.routeCode {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.05em;
+}
+
+.routeArrow {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.routeDate {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ── Content area ── */
+.content {
+    flex: 1;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+/* ── Tabs (round-trip) ── */
+.tabsContainer {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tabButton {
+    background: none;
+    border: none;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+    color: var(--text-main);
+}
+
+.tabButton.activeTab {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ── Results count ── */
+.resultsCount {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.resultsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ── States ── */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 0;
+    color: var(--text-muted);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(37, 99, 235, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.errorState {
+    background-color: rgba(239, 68, 68, 0.08);
+    color: var(--error);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+.emptyState h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+    color: var(--text-muted);
+    max-width: 380px;
+    font-size: 0.95rem;
+}

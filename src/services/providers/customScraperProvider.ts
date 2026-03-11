@@ -24,7 +24,7 @@ export async function customSearchFlights(
     const destParam = destination ? destination.replace(/ /g, '+') : '';
     const targetUrl = isSingleEndpoint
         ? `https://frontier-gowild-gamma.vercel.app/api/flights/single?origin=${origin}&destination=${destParam}&date=${departureDate}`
-        : `https://frontier-gowild-gamma.vercel.app/api/flights/search/stream?origin=${origin}&date=${departureDate}&max_workers=3&token=${token}`;
+        : `https://frontier-gowild-gamma.vercel.app/api/flights/search/stream?origin=${origin}&date=${departureDate}&max_workers=3`;
 
     let browser;
     try {
@@ -69,7 +69,7 @@ export async function customSearchFlights(
 
                     // Read until stream ends OR we get no new data for 3 seconds
                     while (true) {
-                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 3000));
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 10000));
 
                         try {
                             const { done, value } = await Promise.race([readPromise, timeoutPromise]) as any;
