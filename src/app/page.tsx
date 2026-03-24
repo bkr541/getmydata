@@ -19,7 +19,7 @@ function HomeContent() {
         <p>Find your next destination</p>
       </header>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         <section className="card">
           <SearchForm />
         </section>

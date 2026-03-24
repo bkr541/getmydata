@@ -19,7 +19,7 @@ export default function SearchForm() {
 
     const [tripType, setTripType] = useState('One Way');
     const [searchAllLocations, setSearchAllLocations] = useState(false);
-    const tripTypes = ['One Way', 'Round Trip', 'Same Day', 'Multi City'];
+    const tripTypes = ['One Way', 'Round Trip', 'Day Trip', 'Multi City'];
 
     useEffect(() => {
         setOrigin(searchQuery.origin);
@@ -31,7 +31,7 @@ export default function SearchForm() {
     }, [searchQuery]);
 
     useEffect(() => {
-        if (tripType === 'Same Day') {
+        if (tripType === 'Day Trip') {
             setDestination('');
             setSearchAllLocations(false);
         }
@@ -41,7 +41,7 @@ export default function SearchForm() {
         const isOriginValid = origin.length === 0 || origin.length === 3;
         const isDestinationValid = destination.length === 0 || destination.length === 3 || destination.startsWith('CITY:');
 
-        const hasRequiredField = tripType === 'Same Day'
+        const hasRequiredField = tripType === 'Day Trip'
             ? origin.length === 3
             : (origin.length === 3 || destination.length >= 3);
 
@@ -103,7 +103,7 @@ export default function SearchForm() {
 
         try {
             let response;
-            if (tripType === 'Same Day') {
+            if (tripType === 'Day Trip') {
                 // Day trips endpoint
                 response = await fetch(`/api/flights/dayTrips?origin=${origin}&date=${departureDate}&layovertime=${layoverTime}&nonstop=${nonstopDayTrip}`);
             } else if (!origin && destination) {
@@ -160,112 +160,119 @@ export default function SearchForm() {
             </div>
 
             <div className={styles.inputGroup}>
-                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                    <label htmlFor="origin" className="form-label">
-                        {tripType === 'Same Day' ? 'Origin (IATA)' : 'From (IATA)'}
-                    </label>
-                    <input
-                        id="origin"
-                        type="text"
-                        className="form-input"
-                        value={origin}
-                        onChange={handleOriginChange}
-                        placeholder="e.g. JFK"
-                        maxLength={3}
-                        autoComplete="off"
-                        disabled={disableOrigin}
-                    />
+                    <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                        <label htmlFor="origin" className="form-label">
+                            {tripType === 'Day Trip' ? 'Origin (IATA)' : 'From (IATA)'}
+                        </label>
+                        <input
+                            id="origin"
+                            type="text"
+                            className="form-input"
+                            value={origin}
+                            onChange={handleOriginChange}
+                            placeholder="e.g. JFK"
+                            maxLength={3}
+                            autoComplete="off"
+                            disabled={disableOrigin}
+                        />
+                    </div>
+
+                    {tripType !== 'Day Trip' && (
+                        <>
+                            <button type="button" className={`btn-icon ${styles.swapBtn}`} onClick={handleSwap} aria-label="Swap origin and destination" title="Swap origin and destination">
+                                ⇄
+                            </button>
+
+                            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                                <label htmlFor="destination" className="form-label">To (IATA)</label>
+                                <input
+                                    id="destination"
+                                    type="text"
+                                    className="form-input"
+                                    value={destination}
+                                    onChange={handleDestinationChange}
+                                    placeholder="e.g. LHR or CITY:CHICAGO"
+                                    autoComplete="off"
+                                    disabled={disableDestination}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                {tripType !== 'Same Day' && (
-                    <>
-                        <button type="button" className={`btn-icon ${styles.swapBtn}`} onClick={handleSwap} aria-label="Swap origin and destination" title="Swap origin and destination">
-                            ⇄
-                        </button>
-
-                        <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                            <label htmlFor="destination" className="form-label">To (IATA)</label>
-                            <input
-                                id="destination"
-                                type="text"
-                                className="form-input"
-                                value={destination}
-                                onChange={handleDestinationChange}
-                                placeholder="e.g. LHR or CITY:CHICAGO"
-                                autoComplete="off"
-                                disabled={disableDestination}
-                            />
-                        </div>
-                    </>
-                )}
-
-                {tripType === 'Same Day' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label htmlFor="layoverTime" className="form-label">Layover Min (Hours)</label>
-                            <input
-                                id="layoverTime"
-                                type="number"
-                                className="form-input"
-                                value={layoverTime}
-                                onChange={(e) => setLayoverTime(parseInt(e.target.value) || 0)}
-                                min={1}
-                                max={24}
-                                required
-                            />
-                        </div>
-                        <div className={styles.searchAllContainer} style={{ justifyContent: 'flex-start', marginTop: '0.5rem' }}>
-                            <label className={styles.toggleSwitch}>
-                                <input
-                                    type="checkbox"
-                                    checked={nonstopDayTrip}
-                                    onChange={(e) => setNonstopDayTrip(e.target.checked)}
-                                />
-                                <span className={styles.slider}></span>
-                            </label>
-                            <span>Nonstop Only</span>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            <div className="form-group" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
-                <label htmlFor="departureDate" className="form-label">Departure Date</label>
-                <input
-                    id="departureDate"
-                    type="date"
-                    className="form-input"
-                    value={departureDate}
-                    onChange={(e) => setDepartureDate(e.target.value)}
-                    required
-                />
-                {tripType === 'Round Trip' && (
-                    <div className="form-group" style={{ marginLeft: '1rem' }}>
-                        <label htmlFor="returnDate" className="form-label">Return Date</label>
+                <div className={styles.inputGroup} style={{ marginTop: '1rem' }}>
+                    <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                        <label htmlFor="departureDate" className="form-label">Departure Date</label>
                         <input
-                            id="returnDate"
+                            id="departureDate"
                             type="date"
                             className="form-input"
-                            value={returnDate}
-                            onChange={(e) => setReturnDate(e.target.value)}
+                            value={departureDate}
+                            onChange={(e) => setDepartureDate(e.target.value)}
                             required
                         />
                     </div>
-                )}
-                {tripType !== 'Same Day' && (
-                    <div className={styles.searchAllContainer}>
-                        <span>Search All Locations</span>
+
+                    {tripType === 'Round Trip' && (
+                        <>
+                            <div style={{ width: '40px', flexShrink: 0 }} />
+                            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                                <label htmlFor="returnDate" className="form-label">Return Date</label>
+                                <input
+                                    id="returnDate"
+                                    type="date"
+                                    className="form-input"
+                                    value={returnDate}
+                                    onChange={(e) => setReturnDate(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+
+            {tripType === 'Day Trip' && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem', marginTop: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label htmlFor="layoverTime" className="form-label">Layover Min (Hours)</label>
+                        <input
+                            id="layoverTime"
+                            type="number"
+                            className="form-input"
+                            value={layoverTime}
+                            onChange={(e) => setLayoverTime(parseInt(e.target.value) || 0)}
+                            min={1}
+                            max={24}
+                            required
+                        />
+                    </div>
+                    <div className={styles.searchAllContainer} style={{ justifyContent: 'flex-start', marginTop: '1.75rem' }}>
                         <label className={styles.toggleSwitch}>
                             <input
                                 type="checkbox"
-                                checked={searchAllLocations}
-                                onChange={handleSearchAllToggle}
+                                checked={nonstopDayTrip}
+                                onChange={(e) => setNonstopDayTrip(e.target.checked)}
                             />
                             <span className={styles.slider}></span>
                         </label>
+                        <span>Nonstop Only</span>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {tripType !== 'Day Trip' && (
+                <div className={styles.searchAllContainer} style={{ marginTop: '0.75rem' }}>
+                    <span>Search All Locations</span>
+                    <label className={styles.toggleSwitch}>
+                        <input
+                            type="checkbox"
+                            checked={searchAllLocations}
+                            onChange={handleSearchAllToggle}
+                        />
+                        <span className={styles.slider}></span>
+                    </label>
+                </div>
+            )}
 
             {showBothFilledError && (
                 <p className="error-text">Both inputs cannot have a value while 'Search All Locations' is on.</p>
