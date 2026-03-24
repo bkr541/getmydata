@@ -23,8 +23,8 @@ export async function customSearchFlights(
     const isSingleEndpoint = !!destination;
     const destParam = destination ? destination.replace(/ /g, '+') : '';
     const targetUrl = isSingleEndpoint
-        ? `https://frontier-gowild-gamma.vercel.app/api/flights/single?origin=${origin}&destination=${destParam}&date=${departureDate}`
-        : `https://frontier-gowild-gamma.vercel.app/api/flights/search/stream?origin=${origin}&date=${departureDate}&max_workers=3`;
+        ? `https://gowilder.net/api/flights/single?origin=${origin}&destination=${destParam}&date=${departureDate}`
+        : `https://gowilder.net/api/flights/search/stream?origin=${origin}&date=${departureDate}&max_workers=3`;
 
     let browser;
     try {
@@ -45,7 +45,7 @@ export async function customSearchFlights(
         const page = await context.newPage();
 
         // 1. Visit root to pass Vercel Security Checkpoint
-        await page.goto('https://frontier-gowild-gamma.vercel.app/', { waitUntil: 'domcontentloaded' });
+        await page.goto('https://gowilder.net/', { waitUntil: 'domcontentloaded' });
 
         // Wait briefly for challenge to pass
         await new Promise(r => setTimeout(r, 2000));
@@ -180,7 +180,7 @@ export async function customInboundFlights(
 
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyOTQ4LCJlbWFpbCI6ImtvZHlyb2JpbnNvbjAyQGdtYWlsLmNvbSIsImV4cCI6MTc3NDM0ODEwOCwiaWF0IjoxNzcxNzU2MTA4fQ.PfWc26pRP25u9SrX4MINas9BWMzxu8qZtNleqzm8kPY';
 
-    const targetUrl = `https://frontier-gowild-gamma.vercel.app/api/flights/inbound?destination=${destination}&date=${departureDate}&max_workers=${maxWorkers}`;
+    const targetUrl = `https://gowilder.net/api/flights/inbound?destination=${destination}&date=${departureDate}&max_workers=${maxWorkers}`;
 
     let browser;
     try {
@@ -199,7 +199,7 @@ export async function customInboundFlights(
         const context = await browser.newContext();
         const page = await context.newPage();
 
-        await page.goto('https://frontier-gowild-gamma.vercel.app/', { waitUntil: 'domcontentloaded' });
+        await page.goto('https://gowilder.net/', { waitUntil: 'domcontentloaded' });
         await new Promise(r => setTimeout(r, 2000));
 
         const browserData = await page.evaluate(async ({ url, token }) => {
