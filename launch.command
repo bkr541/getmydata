@@ -17,4 +17,8 @@ fi
 pkill -f "next" || true
 
 echo "Starting Flight Search App..."
+
+# Open the app in the default browser after a short delay to let the server start
+(sleep 3 && open "http://localhost:3000") &
+
 npm run dev
