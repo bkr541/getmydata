@@ -1,6 +1,53 @@
+.collapsibleGroup {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-left: -12px;
+    margin-right: -12px;
+}
+
+.collapsibleHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem calc(1.25rem + 12px);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 100%;
+    text-align: left;
+}
+
+.collapsibleHeader:hover {
+    background: var(--hover-bg, rgba(0, 0, 0, 0.04));
+}
+
+.chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    color: var(--text-muted);
+}
+
+.chevronUp {
+    transform: rotate(180deg);
+}
+
 .searchForm {
     display: flex;
     flex-direction: column;
+    padding: 24px calc(1.25rem + 12px) 1.25rem;
+}
+
+.snapshotBody {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 24px calc(1.25rem + 12px) 1.25rem;
 }
 
 .inputGroup {
@@ -106,4 +153,8 @@
 
 .toggleSwitch input:checked+.slider:before {
     transform: translateX(16px);
+}
+
+.hidden {
+    display: none;
 }

@@ -19,6 +19,10 @@ export default function SearchForm() {
 
     const [tripType, setTripType] = useState('One Way');
     const [searchAllLocations, setSearchAllLocations] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [isSnapshotsExpanded, setIsSnapshotsExpanded] = useState(true);
+    const [snapshotIata, setSnapshotIata] = useState('');
+    const [snapshotDate, setSnapshotDate] = useState('');
     const tripTypes = ['One Way', 'Round Trip', 'Day Trip', 'Multi City'];
 
     useEffect(() => {
@@ -149,7 +153,26 @@ export default function SearchForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className={styles.searchForm}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className={styles.collapsibleGroup}>
+            <button
+                type="button"
+                className={styles.collapsibleHeader}
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
+                <span>Search Flights</span>
+                <svg
+                    className={`${styles.chevron} ${isExpanded ? styles.chevronUp : ''}`}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+        <form onSubmit={handleSubmit} className={`${styles.searchForm} ${isExpanded ? '' : styles.hidden}`}>
             <div className={styles.tripTypeSelector}>
                 {tripTypes.map((type) => (
                     <button
@@ -294,5 +317,59 @@ export default function SearchForm() {
                 Search Flights
             </button>
         </form>
+        </div>
+
+        <div className={styles.collapsibleGroup}>
+            <button
+                type="button"
+                className={styles.collapsibleHeader}
+                onClick={() => setIsSnapshotsExpanded(!isSnapshotsExpanded)}
+            >
+                <span>Snapshots</span>
+                <svg
+                    className={`${styles.chevron} ${isSnapshotsExpanded ? styles.chevronUp : ''}`}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+            <div className={`${styles.snapshotBody} ${isSnapshotsExpanded ? '' : styles.hidden}`}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label htmlFor="snapshotIata" className="form-label">IATA</label>
+                    <input
+                        id="snapshotIata"
+                        type="text"
+                        className="form-input"
+                        value={snapshotIata}
+                        onChange={(e) => setSnapshotIata(e.target.value.toUpperCase().slice(0, 3).replace(/[^A-Z]/g, ''))}
+                        placeholder="e.g. JFK"
+                        maxLength={3}
+                        autoComplete="off"
+                    />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label htmlFor="snapshotDate" className="form-label">Date</label>
+                    <input
+                        id="snapshotDate"
+                        type="date"
+                        className="form-input"
+                        value={snapshotDate}
+                        onChange={(e) => setSnapshotDate(e.target.value)}
+                    />
+                </div>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ alignSelf: 'flex-end' }}
+                >
+                    Take Snapshot
+                </button>
+            </div>
+        </div>
+        </div>
     );
 }

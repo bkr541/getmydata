@@ -20,9 +20,7 @@ function HomeContent() {
       </header>
 
       <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <section className="card">
-          <SearchForm />
-        </section>
+        <SearchForm />
 
         <RecentSearches />
       </div>
