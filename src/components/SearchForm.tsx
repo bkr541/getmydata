@@ -7,7 +7,7 @@ import styles from './SearchForm.module.css';
 export default function SearchForm() {
     // This block fixes the linter error regarding setReturnFlightResults in SearchForm
     // Replacing the SearchForm inner state extraction
-    const { searchQuery, setSearchQuery, setIsLoading, setFlightResults, setReturnFlightResults, setError, addRecentSearch, setShowResults } = useSearch();
+    const { searchQuery, setSearchQuery, setIsLoading, setFlightResults, setReturnFlightResults, setDayTripResults, setError, addRecentSearch, setShowResults } = useSearch();
 
     const [origin, setOrigin] = useState(searchQuery.origin);
     const [destination, setDestination] = useState(searchQuery.destination);
@@ -100,6 +100,7 @@ export default function SearchForm() {
         setError(null);
         setFlightResults(null);
         setReturnFlightResults(null);
+        setDayTripResults(null);
 
         try {
             let response;
@@ -133,6 +134,9 @@ export default function SearchForm() {
             if (tripType === 'Round Trip') {
                 setFlightResults(data.outboundFlights || []);
                 setReturnFlightResults(data.returnFlights || []);
+            } else if (tripType === 'Day Trip') {
+                setFlightResults(data.flights || []);
+                setDayTripResults(data.dayTrips || []);
             } else {
                 setFlightResults(data.flights || []);
                 setReturnFlightResults(null);

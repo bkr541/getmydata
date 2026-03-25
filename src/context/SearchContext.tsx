@@ -1,6 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { DayTrip } from '@/services/dayTripService';
+
+export type { DayTrip };
 
 export interface FlightSearchQuery {
     origin: string;
@@ -36,6 +39,8 @@ interface SearchContextType {
     setFlightResults: (results: FlightResult[] | null) => void;
     returnFlightResults: FlightResult[] | null;
     setReturnFlightResults: (results: FlightResult[] | null) => void;
+    dayTripResults: DayTrip[] | null;
+    setDayTripResults: (results: DayTrip[] | null) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
     error: string | null;
@@ -52,6 +57,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const [searchQuery, setSearchQuery] = useState<FlightSearchQuery>({ origin: '', destination: '', departureDate: '' });
     const [flightResults, setFlightResults] = useState<FlightResult[] | null>(null);
     const [returnFlightResults, setReturnFlightResults] = useState<FlightResult[] | null>(null);
+    const [dayTripResults, setDayTripResults] = useState<DayTrip[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [recentSearches, setRecentSearches] = useState<FlightSearchQuery[]>([]);
@@ -72,6 +78,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
                 searchQuery, setSearchQuery,
                 flightResults, setFlightResults,
                 returnFlightResults, setReturnFlightResults,
+                dayTripResults, setDayTripResults,
                 isLoading, setIsLoading,
                 error, setError,
                 recentSearches, addRecentSearch,

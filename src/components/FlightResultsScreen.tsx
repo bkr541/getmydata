@@ -4,6 +4,7 @@ import React from 'react';
 import { useSearch, FlightResult } from '@/context/SearchContext';
 import FlightCard from './FlightCard';
 import FlightGroup from './FlightGroup';
+import DayTripCard from './DayTripCard';
 import styles from './FlightResultsScreen.module.css';
 
 export default function FlightResultsScreen() {
@@ -11,10 +12,13 @@ export default function FlightResultsScreen() {
         searchQuery,
         flightResults,
         returnFlightResults,
+        dayTripResults,
         isLoading,
         error,
         setShowResults,
     } = useSearch();
+
+    const isDayTrip = dayTripResults !== null;
 
     const [activeTab, setActiveTab] = React.useState<'departure' | 'return'>('departure');
 
@@ -109,16 +113,33 @@ export default function FlightResultsScreen() {
                 )}
 
                 {/* Empty */}
-                {!isLoading && !error && flightResults !== null && flightResults.length === 0 && (
+                {!isLoading && !error && (
+                    (isDayTrip && dayTripResults!.length === 0) ||
+                    (!isDayTrip && flightResults !== null && flightResults.length === 0)
+                ) && (
                     <div className={styles.emptyState}>
                         <div className={styles.emptyIcon}>✈️</div>
-                        <h3>No flights found</h3>
-                        <p>We couldn't find any flights matching your criteria. Try adjusting your dates or destinations.</p>
+                        <h3>No {isDayTrip ? 'day trips' : 'flights'} found</h3>
+                        <p>We couldn't find any {isDayTrip ? 'day trips' : 'flights'} matching your criteria. Try adjusting your dates or destinations.</p>
                     </div>
                 )}
 
-                {/* Results */}
-                {!isLoading && !error && currentResults.length > 0 && (
+                {/* Day Trip Results */}
+                {!isLoading && !error && isDayTrip && dayTripResults!.length > 0 && (
+                    <>
+                        <p className={styles.resultsCount}>
+                            {dayTripResults!.length} day trip{dayTripResults!.length !== 1 ? 's' : ''} found
+                        </p>
+                        <div className={styles.resultsList}>
+                            {dayTripResults!.map(trip => (
+                                <DayTripCard key={trip.id} trip={trip} date={searchQuery.departureDate} />
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* Regular Flight Results */}
+                {!isLoading && !error && !isDayTrip && currentResults.length > 0 && (
                     <>
                         <p className={styles.resultsCount}>
                             {currentResults.length} flight{currentResults.length !== 1 ? 's' : ''} found
