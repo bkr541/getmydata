@@ -338,7 +338,7 @@ export default function SearchForm() {
                 </svg>
             </button>
             <div className={`${styles.snapshotBody} ${isSnapshotsExpanded ? '' : styles.hidden}`}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
+                <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
                     <label htmlFor="snapshotIata" className="form-label">IATA</label>
                     <input
                         id="snapshotIata"
@@ -364,7 +364,7 @@ export default function SearchForm() {
                 <button
                     type="button"
                     className="btn btn-primary"
-                    style={{ alignSelf: 'flex-end' }}
+                    style={{ alignSelf: 'flex-end', width: 'fit-content', flexShrink: 0, whiteSpace: 'nowrap' }}
                 >
                     Take Snapshot
                 </button>

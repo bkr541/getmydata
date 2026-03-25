@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import { Quicksand } from 'next/font/google';
 import './globals.css';
+
+const quicksand = Quicksand({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'FlightSearch - Find your next destination',
@@ -13,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={quicksand.className}>{children}</body>
     </html>
   );
 }

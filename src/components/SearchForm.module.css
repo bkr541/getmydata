@@ -6,6 +6,7 @@
     overflow: hidden;
     margin-left: -12px;
     margin-right: -12px;
+    background-color: #ffffff;
 }
 
 .collapsibleHeader {
@@ -16,8 +17,8 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.375rem;
+    font-weight: 400;
     color: var(--text-primary);
     width: 100%;
     text-align: left;
@@ -40,14 +41,14 @@
 .searchForm {
     display: flex;
     flex-direction: column;
-    padding: 24px calc(1.25rem + 12px) 1.25rem;
+    padding: 24px calc(1.25rem + 24px) 1.25rem;
 }
 
 .snapshotBody {
     display: flex;
     align-items: flex-end;
     gap: 1rem;
-    padding: 24px calc(1.25rem + 12px) 1.25rem;
+    padding: 24px calc(1.25rem + 24px) 1.25rem;
 }
 
 .inputGroup {
