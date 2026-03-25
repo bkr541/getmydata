@@ -121,6 +121,12 @@
     gap: 0;
 }
 
+.dayTripGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+}
+
 /* ── States ── */
 .loadingState {
     display: flex;

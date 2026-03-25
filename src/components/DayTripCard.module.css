@@ -1,10 +1,12 @@
 .card {
     background: var(--card-bg);
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
     overflow: hidden;
-    margin-bottom: 1.25rem;
+    margin: 0;
     border: 1px solid var(--border-color);
+    max-width: 100%;
+    width: 100%;
 }
 
 /* ── Header ── */
@@ -14,12 +16,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
 }
 
 .headerDate {
-    font-size: 1.15rem;
+    font-size: 0.9rem;
     font-weight: 700;
 }
 
@@ -27,16 +29,17 @@
 .body {
     display: flex;
     align-items: center;
-    padding: 1.5rem 1.25rem 1.25rem;
-    gap: 0.5rem;
+    justify-content: space-between;
+    padding: 0.875rem 1rem 0.75rem;
+    gap: 0;
 }
 
 .flightCol {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 auto;
+    width: 110px;
 }
 
 .returnCol {
@@ -46,12 +49,12 @@
 
 .directionBadge {
     display: inline-block;
-    font-size: 0.68rem;
+    font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    padding: 0.2rem 0.7rem;
+    padding: 0.15rem 0.55rem;
     border-radius: 999px;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
 }
 
 .outboundBadge {
@@ -67,10 +70,10 @@
 }
 
 .airportCode {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 800;
     line-height: 1;
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.05rem;
 }
 
 .outboundCode {
@@ -82,26 +85,26 @@
 }
 
 .flightTime {
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--text-main);
 }
 
 .flightLabel {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .durationPill {
     background-color: var(--bg-color);
     color: var(--text-main);
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    padding: 0.2rem 0.75rem;
+    padding: 0.15rem 0.55rem;
     border-radius: 999px;
     border: 1px solid var(--border-color);
-    margin: 0.3rem 0 0.55rem;
+    margin: 0.2rem 0 0.35rem;
     display: inline-block;
 }
 
@@ -110,10 +113,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 auto;
-    width: 148px;
+    flex: 1;
     text-align: center;
-    gap: 0.4rem;
+    gap: 0.3rem;
 }
 
 .groundTimePill {
@@ -121,43 +123,43 @@
     color: white;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.9rem;
+    gap: 0.3rem;
+    padding: 0.3rem 0.65rem;
     border-radius: 999px;
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .groundTimeLabel {
-    font-size: 0.78rem;
+    font-size: 0.68rem;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .centerDivider {
     width: 100%;
     height: 1px;
     background: var(--border-color);
-    margin-top: 0.15rem;
+    margin-top: 0.1rem;
 }
 
 /* ── Footer badges ── */
 .footer {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.875rem 1.25rem 1.125rem;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem 0.75rem;
     border-top: 1px solid var(--border-color);
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.85rem;
+    gap: 0.3rem;
+    padding: 0.25rem 0.65rem;
     border-radius: 999px;
-    font-size: 0.78rem;
+    font-size: 0.7rem;
     font-weight: 700;
 }
 

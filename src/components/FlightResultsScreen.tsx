@@ -130,11 +130,12 @@ export default function FlightResultsScreen() {
                         <p className={styles.resultsCount}>
                             {dayTripResults!.length} day trip{dayTripResults!.length !== 1 ? 's' : ''} found
                         </p>
-                        <div className={styles.resultsList}>
+                        <div className={styles.dayTripGrid}>
                             {dayTripResults!.map(trip => (
                                 <DayTripCard key={trip.id} trip={trip} date={searchQuery.departureDate} />
                             ))}
                         </div>
+
                     </>
                 )}
 
