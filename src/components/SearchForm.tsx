@@ -17,6 +17,38 @@ export default function SearchForm() {
     const [nonstopDayTrip, setNonstopDayTrip] = useState(searchQuery.nonstopDayTrip ?? true);
     const [isValid, setIsValid] = useState(false);
 
+    const [token, setToken] = useState(() => {
+        if (typeof window !== 'undefined') return localStorage.getItem('api_token') ?? '';
+        return '';
+    });
+
+    const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setToken(val);
+        localStorage.setItem('api_token', val);
+    };
+
+    const getTokenExpiration = (t: string): { label: string; color: string } | null => {
+        try {
+            const payload = JSON.parse(atob(t.split('.')[1]));
+            if (!payload.exp) return null;
+            const now = Date.now();
+            const expMs = payload.exp * 1000;
+            const daysLeft = (expMs - now) / (1000 * 60 * 60 * 24);
+            if (daysLeft <= 0) return { label: 'EXPIRED', color: 'red' };
+            const label = new Date(expMs).toLocaleString();
+            if (daysLeft < 5) return { label, color: 'orange' };
+            if (daysLeft <= 10) return { label, color: 'goldenrod' };
+            return { label, color: 'green' };
+        } catch {
+            return null;
+        }
+    };
+
+    const tokenExpiration = getTokenExpiration(token);
+
+    const [showToken, setShowToken] = useState(false);
+
     const [tripType, setTripType] = useState('One Way');
     const [searchAllLocations, setSearchAllLocations] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
@@ -78,7 +110,7 @@ export default function SearchForm() {
     };
 
     const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.toUpperCase().replace(/[^A-Z:\s]/g, '');
+        let val = e.target.value.toUpperCase().replace(/[^A-Z:+\s]/g, '');
         if (!val.startsWith('CITY:') && !"CITY:".startsWith(val)) {
             val = val.slice(0, 3).replace(/[^A-Z]/g, '');
         }
@@ -108,23 +140,25 @@ export default function SearchForm() {
 
         try {
             let response;
+            const authHeaders: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+
             if (tripType === 'Day Trip') {
                 // Day trips endpoint
-                response = await fetch(`/api/flights/dayTrips?origin=${origin}&date=${departureDate}&layovertime=${layoverTime}&nonstop=${nonstopDayTrip}`);
+                response = await fetch(`/api/flights/dayTrips?origin=${origin}&date=${departureDate}&layovertime=${layoverTime}&nonstop=${nonstopDayTrip}`, { headers: authHeaders });
             } else if (!origin && destination) {
                 // Inbound search: only destination and date are provided
-                response = await fetch(`/api/flights/inbound?destination=${destination}&date=${departureDate}`);
+                response = await fetch(`/api/flights/inbound?destination=${destination}&date=${departureDate}`, { headers: authHeaders });
             } else if (tripType === 'Round Trip') {
                 response = await fetch('/api/flights/roundTrip', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...authHeaders },
                     body: JSON.stringify(query),
                 });
             } else {
                 // Outbound search
                 response = await fetch('/api/flights/search', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...authHeaders },
                     body: JSON.stringify(query),
                 });
             }
@@ -154,6 +188,50 @@ export default function SearchForm() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className={styles.collapsibleGroup}>
+            <div className="form-group" style={{ marginBottom: 0, padding: '12px 16px' }}>
+                <label htmlFor="apiToken" className="form-label">API Token</label>
+                <div style={{ position: 'relative' }}>
+                    <input
+                        id="apiToken"
+                        type={showToken ? 'text' : 'password'}
+                        className="form-input"
+                        value={token}
+                        onChange={handleTokenChange}
+                        placeholder="Paste your token here"
+                        autoComplete="off"
+                        style={{ paddingRight: '2.25rem' }}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowToken(v => !v)}
+                        style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                        aria-label={showToken ? 'Hide token' : 'Show token'}
+                    >
+                        {showToken ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        )}
+                    </button>
+                </div>
+                {tokenExpiration && (
+                    <p style={{ marginTop: '6px', fontSize: '0.8rem', color: '#6b7280' }}>
+                        <span style={{ fontWeight: 500 }}>Expiration Date: </span>
+                        <span style={{ color: tokenExpiration.color, fontWeight: tokenExpiration.label === 'EXPIRED' ? 700 : 400 }}>
+                            {tokenExpiration.label}
+                        </span>
+                    </p>
+                )}
+            </div>
+        </div>
         <div className={styles.collapsibleGroup}>
             <button
                 type="button"
