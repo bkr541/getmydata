@@ -11,7 +11,8 @@ export type FlightProviderMethod = 'mock' | 'customScraper';
  */
 export async function searchFlights(
     query: FlightSearchQuery,
-    provider: FlightProviderMethod = 'customScraper'
+    provider: FlightProviderMethod = 'customScraper',
+    token: string = ''
 ): Promise<FlightResult[]> {
     const { origin, destination, departureDate } = query;
 
@@ -20,11 +21,11 @@ export async function searchFlights(
     }
 
     // Route to the appropriate provider
-    // In production, you might determine this based on route pairs, 
+    // In production, you might determine this based on route pairs,
     // feature flags, or environment variables.
     switch (provider) {
         case 'customScraper':
-            return customSearchFlights(origin, destination, departureDate);
+            return customSearchFlights(origin, destination, departureDate, token);
         case 'mock':
         default:
             return mockSearchFlights(origin, destination, departureDate);

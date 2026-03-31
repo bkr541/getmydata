@@ -13,12 +13,9 @@ chromium.use(stealth());
 export async function customSearchFlights(
     origin: string,
     destination: string,
-    departureDate: string
+    departureDate: string,
+    token: string
 ): Promise<FlightResult[]> {
-
-    // NOTE: This hardcoded token expires. In a full production app, you
-    // would intercept the `/api/auth/verify-token` request or perform Google SI to get this.
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyOTQ4LCJlbWFpbCI6ImtvZHlyb2JpbnNvbjAyQGdtYWlsLmNvbSIsImV4cCI6MTc3NzUxMjQ4MywiaWF0IjoxNzc0OTIwNDgzfQ.jCd_c9aiYb2BIm8geIy29yWm-LOSG9SV1HWq0O8WmH0';
 
     const isSingleEndpoint = !!destination;
     const destParam = destination ? destination.replace(/ /g, '+') : '';
@@ -175,10 +172,9 @@ export async function customSearchFlights(
 export async function customInboundFlights(
     destination: string,
     departureDate: string,
-    maxWorkers: number = 10
+    maxWorkers: number = 10,
+    token: string = ''
 ): Promise<FlightResult[]> {
-
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyOTQ4LCJlbWFpbCI6ImtvZHlyb2JpbnNvbjAyQGdtYWlsLmNvbSIsImV4cCI6MTc3NzUxMjQ4MywiaWF0IjoxNzc0OTIwNDgzfQ.jCd_c9aiYb2BIm8geIy29yWm-LOSG9SV1HWq0O8WmH0';
 
     const targetUrl = `https://gowilder.net/api/flights/inbound?destination=${destination}&date=${departureDate}&max_workers=${maxWorkers}`;
 

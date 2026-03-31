@@ -16,6 +16,14 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
     try {
+        const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? '';
+        if (!token) {
+            return NextResponse.json(
+                { message: 'Missing Authorization header' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
         const body: FlightSearchQuery = await request.json();
 
         // 1. Validate payload
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
 
         // 2. Pass exact parameters from body to the provider orchestrator
         // By default uses the 'mock' provider. Switch to 'customScraper' to use the stub.
-        const flights = await searchFlights(body, 'customScraper');
+        const flights = await searchFlights(body, 'customScraper', token);
 
         // 3. Return results
         return NextResponse.json({ flights }, { status: 200, headers: corsHeaders });

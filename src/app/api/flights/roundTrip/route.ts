@@ -16,6 +16,14 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
     try {
+        const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? '';
+        if (!token) {
+            return NextResponse.json(
+                { message: 'Missing Authorization header' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
         const body = await request.json();
         const { origin, destination, departureDate, returnDate } = body;
 
@@ -36,8 +44,8 @@ export async function POST(request: Request) {
 
         // 2. Fetch both sets of flights concurrently
         const [outboundFlights, returnFlights] = await Promise.all([
-            customSearchFlights(origin, destination, departureDate),
-            customSearchFlights(destination, origin, returnDate)
+            customSearchFlights(origin, destination, departureDate, token),
+            customSearchFlights(destination, origin, returnDate, token)
         ]);
 
         // 3. Return combined results

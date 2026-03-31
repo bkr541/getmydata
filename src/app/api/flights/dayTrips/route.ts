@@ -16,6 +16,14 @@ export async function OPTIONS() {
 
 export async function GET(request: Request) {
     try {
+        const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? '';
+        if (!token) {
+            return NextResponse.json(
+                { message: 'Missing Authorization header' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
         const { searchParams } = new URL(request.url);
         const origin = searchParams.get('origin');
         const departureDate = searchParams.get('date');
@@ -33,7 +41,7 @@ export async function GET(request: Request) {
         const isNonstop = nonstopParam !== 'false'; // Defaults to true
 
         // 1. Fetch all outgoing flights from origin
-        let outboundFlights = await customSearchFlights(origin, '', departureDate);
+        let outboundFlights = await customSearchFlights(origin, '', departureDate, token);
         if (isNonstop) {
             outboundFlights = outboundFlights.filter(f => f.stops === 0);
         }
@@ -45,7 +53,7 @@ export async function GET(request: Request) {
         // 2. Fetch all incoming flights back to origin
         // Note: customInboundFlights searches everywhere *to* a destination. 
         // Here, our "destination" is our home origin.
-        let inboundFlights = await customInboundFlights(origin, departureDate, 15);
+        let inboundFlights = await customInboundFlights(origin, departureDate, 15, token);
         if (isNonstop) {
             inboundFlights = inboundFlights.filter(f => f.stops === 0);
         }

@@ -15,6 +15,14 @@ export async function OPTIONS() {
 
 export async function GET(request: Request) {
     try {
+        const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? '';
+        if (!token) {
+            return NextResponse.json(
+                { message: 'Missing Authorization header' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
         const { searchParams } = new URL(request.url);
         const destination = searchParams.get('destination');
         const departureDate = searchParams.get('date');
@@ -29,7 +37,7 @@ export async function GET(request: Request) {
 
         const maxWorkers = maxWorkersParam ? parseInt(maxWorkersParam, 10) : 10;
 
-        const flights = await customInboundFlights(destination, departureDate, maxWorkers);
+        const flights = await customInboundFlights(destination, departureDate, maxWorkers, token);
 
         return NextResponse.json({ flights }, { status: 200, headers: corsHeaders });
 
