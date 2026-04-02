@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     try {
         const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? '';
         if (!token) {
+            console.warn('[API /api/flights/inbound] Missing Authorization header');
             return NextResponse.json(
                 { message: 'Missing Authorization header' },
                 { status: 401, headers: corsHeaders }

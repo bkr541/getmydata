@@ -25,7 +25,7 @@ export async function customSearchFlights(
 
     let browser;
     try {
-        console.log(`[Scraper] Initiating search: ${origin} to ${destination || 'anywhere'} on ${departureDate}`);
+        console.log(`[Scraper] Initiating search: ${origin} to ${destination || 'anywhere'} on ${departureDate} (${isSingleEndpoint ? 'single' : 'stream'} endpoint)`);
 
         // Launch headless browser
         browser = await chromium.launch({
@@ -52,10 +52,12 @@ export async function customSearchFlights(
             try {
                 if (isSingle) {
                     const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) return `ERROR: Gowilder single responded ${res.status}`;
                     const data = await res.json();
                     return `JSON:${JSON.stringify(data)}`;
                 } else {
-                    const res = await fetch(url);
+                    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) return `ERROR: Gowilder stream responded ${res.status}`;
                     const reader = res.body?.getReader();
                     if (!reader) throw new Error('No reader found');
 
