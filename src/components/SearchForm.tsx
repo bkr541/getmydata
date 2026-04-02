@@ -51,8 +51,10 @@ export default function SearchForm() {
 
     const [tripType, setTripType] = useState('One Way');
     const [searchAllLocations, setSearchAllLocations] = useState(false);
+    const [isTokenExpanded, setIsTokenExpanded] = useState(true);
     const [isExpanded, setIsExpanded] = useState(true);
     const [isSnapshotsExpanded, setIsSnapshotsExpanded] = useState(true);
+    const [isActionsExpanded, setIsActionsExpanded] = useState(true);
     const [snapshotIata, setSnapshotIata] = useState('');
     const [snapshotDate, setSnapshotDate] = useState('');
     const tripTypes = ['One Way', 'Round Trip', 'Day Trip', 'Multi City'];
@@ -123,6 +125,12 @@ export default function SearchForm() {
         setDestination(temp);
     };
 
+    const handleClearCache = async () => {
+        if (typeof caches === 'undefined') return;
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key)));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isValid) return;
@@ -189,47 +197,66 @@ export default function SearchForm() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div className={styles.collapsibleGroup}>
-            <div className="form-group" style={{ marginBottom: 0, padding: '12px 16px' }}>
-                <label htmlFor="apiToken" className="form-label">API Token</label>
-                <div style={{ position: 'relative' }}>
-                    <input
-                        id="apiToken"
-                        type={showToken ? 'text' : 'password'}
-                        className="form-input"
-                        value={token}
-                        onChange={handleTokenChange}
-                        placeholder="Paste your token here"
-                        autoComplete="off"
-                        style={{ paddingRight: '2.25rem' }}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowToken(v => !v)}
-                        style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
-                        aria-label={showToken ? 'Hide token' : 'Show token'}
-                    >
-                        {showToken ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                                <line x1="1" y1="1" x2="23" y2="23"/>
-                            </svg>
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        )}
-                    </button>
+            <button
+                type="button"
+                className={styles.collapsibleHeader}
+                onClick={() => setIsTokenExpanded(!isTokenExpanded)}
+            >
+                <span>API Token</span>
+                <svg
+                    className={`${styles.chevron} ${isTokenExpanded ? styles.chevronUp : ''}`}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+            <div className={`${styles.searchForm} ${isTokenExpanded ? '' : styles.hidden}`}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label htmlFor="apiToken" className="form-label">Token</label>
+                    <div style={{ position: 'relative' }}>
+                        <input
+                            id="apiToken"
+                            type={showToken ? 'text' : 'password'}
+                            className="form-input"
+                            value={token}
+                            onChange={handleTokenChange}
+                            placeholder="Paste your token here"
+                            autoComplete="off"
+                            style={{ paddingRight: '2.25rem' }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowToken(v => !v)}
+                            style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6b7280' }}
+                            aria-label={showToken ? 'Hide token' : 'Show token'}
+                        >
+                            {showToken ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                    {tokenExpiration && (
+                        <p style={{ marginTop: '6px', fontSize: '0.8rem', color: '#6b7280' }}>
+                            <span style={{ fontWeight: 500 }}>Expiration Date: </span>
+                            <span style={{ color: tokenExpiration.color, fontWeight: tokenExpiration.label === 'EXPIRED' ? 700 : 400 }}>
+                                {tokenExpiration.label}
+                            </span>
+                        </p>
+                    )}
                 </div>
-                {tokenExpiration && (
-                    <p style={{ marginTop: '6px', fontSize: '0.8rem', color: '#6b7280' }}>
-                        <span style={{ fontWeight: 500 }}>Expiration Date: </span>
-                        <span style={{ color: tokenExpiration.color, fontWeight: tokenExpiration.label === 'EXPIRED' ? 700 : 400 }}>
-                            {tokenExpiration.label}
-                        </span>
-                    </p>
-                )}
             </div>
         </div>
         <div className={styles.collapsibleGroup}>
@@ -445,6 +472,36 @@ export default function SearchForm() {
                     style={{ alignSelf: 'flex-end', width: 'fit-content', flexShrink: 0, whiteSpace: 'nowrap' }}
                 >
                     Take Snapshot
+                </button>
+            </div>
+        </div>
+
+        <div className={styles.collapsibleGroup}>
+            <button
+                type="button"
+                className={styles.collapsibleHeader}
+                onClick={() => setIsActionsExpanded(!isActionsExpanded)}
+            >
+                <span>Actions</span>
+                <svg
+                    className={`${styles.chevron} ${isActionsExpanded ? styles.chevronUp : ''}`}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+            <div className={`${styles.searchForm} ${isActionsExpanded ? '' : styles.hidden}`}>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ width: 'fit-content' }}
+                    onClick={handleClearCache}
+                >
+                    Clear Cache
                 </button>
             </div>
         </div>
